@@ -1,5 +1,5 @@
 import pytest
-from hypothesis import given, strategies as st, assume, example, settings, note
+from hypothesis import given, strategies as st, example, settings, note
 from hypothesis.stateful import RuleBasedStateMachine, rule, invariant
 from lib import sum_objects
 
@@ -32,14 +32,15 @@ class TestSumObjectsWithHypothesis:
         assert sum_objects(0, a) == a
 
     @given(
-        st.floats(allow_nan=False, allow_infinity=False),
-        st.floats(allow_nan=False, allow_infinity=False),
+        st.floats(
+            allow_nan=False, allow_infinity=False, min_value=-1e10, max_value=1e10
+        ),
+        st.floats(
+            allow_nan=False, allow_infinity=False, min_value=-1e10, max_value=1e10
+        ),
     )
     def test_sum_floats_property(self, a, b):
         """Property-based test for float addition with constraints."""
-        # Skip very large numbers that might cause overflow
-        assume(abs(a) < 1e10 and abs(b) < 1e10)
-
         result = sum_objects(a, b)
 
         # Property: result should be approximately equal to a + b
@@ -70,11 +71,9 @@ class TestSumObjectsWithHypothesis:
         assert result[: len(a)] == a
         assert result[len(a) :] == b
 
-    @given(st.one_of(st.integers(), st.floats(allow_nan=False)), st.text())
+    @given(st.one_of(st.integers(), st.floats(allow_nan=False)), st.text(min_size=1))
     def test_sum_incompatible_types_raises_error(self, number, text):
         """Property-based test: incompatible types should raise TypeError."""
-        assume(text != "")  # Avoid empty strings which might have special behavior
-
         with pytest.raises(TypeError):
             sum_objects(number, text)
 
@@ -173,7 +172,7 @@ class TestAdvancedHypothesis:
         st.recursive(
             st.integers(),
             lambda children: st.lists(children, min_size=1, max_size=3),
-            max_leaves=10,
+            max_leaves=50,
         )
     )
     def test_sum_nested_structure(self, nested_data):
@@ -268,7 +267,7 @@ class TestHypothesisIntegration:
         assert result == expected
 
     @given(st.integers())
-    def test_hypothesis_with_fixture(self, value, test_session_data):
+    def test_hypothesis_with_fixture(self, test_session_data, value):
         """Using Hypothesis with pytest fixtures."""
         # Access session data from our fixture
         assert "test_run_id" in test_session_data
