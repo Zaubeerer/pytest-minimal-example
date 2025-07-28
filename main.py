@@ -1,3 +1,4 @@
+import requests
 from typing import Any
 
 
@@ -28,6 +29,23 @@ def get_the_value(data: dict[str: Any], key: str) -> Any:
         err = f"Key '{key}' not found in data"
         raise KeyError(err)
     return value
+
+
+def get_my_public_api() -> str:
+    """
+    A public API function that returns a string.
+
+    Returns
+    -------
+    str
+        A string indicating the public API.
+    """
+    url = "https://api.ipify.org"
+
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch data from {url}, status code: {response.status_code}")
+    return response.text
 
 
 if __name__ == "__main__":
