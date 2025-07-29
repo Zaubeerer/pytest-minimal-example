@@ -67,10 +67,20 @@ def test_sum_objects_type_errors(a, b):
         sum_objects(a, b)
 
 
-def test_sum_with_fixture(base_number):
+@pytest.mark.parametrize(
+    "another_parameter",
+    [
+        pytest.param(1, id="another_param_1"),
+        pytest.param(2, id="another_param_2"),
+    ],
+)
+def test_sum_with_fixture(base_number, another_parameter):
     """Test sum_objects using the parametrized fixture from conftest.py."""
-    result = sum_objects(base_number, 1)
-    assert result == base_number + 1
+    print(
+        f"\nUsing base_number: {base_number} with another_parameter: {another_parameter}"
+    )
+    result = sum_objects(base_number, another_parameter)
+    assert result == base_number + another_parameter
 
 
 @pytest.mark.negative
